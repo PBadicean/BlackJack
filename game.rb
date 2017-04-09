@@ -89,11 +89,6 @@ class Game
   def skip_move_user
     puts ' '*80
     puts 'Your move: you skiped a move'
-    @actions_user.each_with_index do |value, index|
-      if value == '2 Skip a move'
-        @actions_user.delete(@actions_user[index])
-      end
-    end
     move_deller
   end
 
