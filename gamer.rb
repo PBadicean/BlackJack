@@ -1,6 +1,9 @@
 require_relative 'deck'
 
 class Gamer
+  GAIN = 20
+  HALF = 10
+  LEVY = 10
 
   attr_accessor :bank, :cards, :deck, :score
 
@@ -12,35 +15,37 @@ class Gamer
     @score = 0
   end
 
-  def add_cart
-    do_card(1)
-    card = @cards.last
-     if card.include?('tuz')
-       if @score > 10
-        @deck.all_cards[card] == 1
-      end
-      end
+  def do_levy
+    @bank -= LEVY
   end
 
-  def do_card(count)
-    count.times do |card|
-      card = @deck.all_cards.keys.sample
-      @score += @deck.all_cards[card]
-      @cards << card
+  def add_card
+    do_card(1)
+    card = @cards.last
+    if card.include?('tuz')
+      if @score > 11
+        @deck.all_cards[card] == 1
+      end
     end
+  end
+
+  def do_card
+    card = @deck.all_cards.keys.sample
+    @score += @deck.all_cards[card]
+    @cards << card
   end
 
   def open_carts(player1, player2)
     if player1.score > player2.score && player1.score < 22
       puts "YOU WIN!!!"
-      player1.bank += 20
+      player1.bank += GAIN
     elsif player1.score == player2.score
       puts "DRAW"
-      player1.bank += 10
-      player2.bank += 10
+      player1.bank += HALF
+      player2.bank += HALF
     else
       puts "YOU LOSE!!!"
-      player2.bank += 20
+      player2.bank += GAIN
     end
   end
 end

@@ -2,93 +2,107 @@ require_relative 'gamer'
 require_relative 'deck'
 
 class Game
-  COMANDS = %w(add_cart_user skip_move_user open_carts)
+  METHODS = %w(add_card_user skip_move_user open_cards)
 
   def initialize(user_name)
     @deck = Deck.new
     @user = Gamer.new(user_name)
     @dealer = Gamer.new("dealer")
+    @bank = 20
   end
 
   def start
-    @user.do_card(2)
-    @dealer.do_card(2)
-    @user.bank -= 10
-    @dealer.bank -=  10
-    @bank_game = 20
-    date
+    give_out_cards
+    levy
+    info
   end
 
-  def date
-    @actions_user = ['1 Add cart', '2 Skip a move', '3 Open carts']
+  def give_out_cards
+    2.times do
+      @user.do_card
+      @dealer.do_card
+    end
+  end
+
+  def levy
+    @user.do_levy
+    @dealer.do_levy
+  end
+
+  def info
+    @actions = ['1 Add cart', '2 Skip a move', '3 Open carts']
     puts "Bank deller: #{@dealer.bank}"
     puts "Your bank: #{@user.bank}"
-    puts "Bank game: #{@bank_game}"
+    puts "Bank game: #{@bank}"
 
     puts "Your cards #{@user.cards.inspect}, your score: #{@user.score}"
     puts "dealer cards [* *]"
-    comands
+    move_user
   end
 
-  def comands
+  def move_user
     puts ' '*80
     puts "Choose number desired action"
-    puts @actions_user
-    answer = gets.chomp.to_i - 1
-    action = COMANDS[answer]
-    send(action)
+    puts @actions
+    answer = gets.chomp.to_i
+    action = METHODS[answer - 1]
+    steps(answer, action)
   end
 
-  def add_cart_user
-    # добавит карту и удалит команду из списка команд
-    @user.do_card(1)
+  def steps(answer, action)
+    if answer >= 4
+      return
+    elsif answer == 3
+      send(action)
+      puts "You want continue Y or N"
+      ans = gets.chomp
+      continue if ans == 'Y'
+      return if ans != 'Y'
+    else
+      send(action)
+      move_dealer
+      move_user
+    end
+  end
+
+  def move_dealer
+    if @dealer.score < 15
+      add_card_dealer
+    elsif @dealer.score > 15
+      skip_move_dealer
+    end
+  end
+
+  def add_card_user
+    @user.do_card
     puts "#{@user.cards.last}"
-    @actions_user.each_with_index do |action, index|
-    @actions_user.delete(@actions_user[index]) if action == '1 Add cart'
-    end
-    move_deller
+    @actions.delete_at(0) if @actions.include?('1 Add cart')
   end
 
-  def move_deller
-    add_cart_deller if @dealer.score < 15
-    skip_move_deller if @dealer.score > 15
-    end
-  end
-
-  def add_cart_deller
+  def add_card_dealer
     puts 'Deller move: deller add cart'
-    @deller.do_card(1)
-    comands
+    @dealer.do_card
   end
 
   def skip_move_user
     puts 'Your move: you skiped a move'
-    move_deller
   end
 
-  def skip_move_deller
+  def skip_move_dealer
     puts 'Deller move: deller skiped a move'
-    comands
   end
 
-  def open_carts
+  def open_cards
     puts"Your carts and score: #{@user.cards.inspect}------#{@user.score}"
     puts"Dealer carts and score: #{@dealer.cards.inspect}------#{@dealer.score}"
     @user.open_carts(@user, @dealer)
-    continue
   end
 
   def continue
-    puts 'You want continue game 1 else 2'
-    answer = gets.chomp.to_i
-    if answer == 1
-      @user.cards = []
-      @dealer.cards = []
-      @user.score = 0
-      @dealer.score = 0
-      start
-    else
-      return
-    end
+    @user.cards = []
+    @dealer.cards = []
+    @user.score = 0
+    @dealer.score = 0
+    start
   end
 end
