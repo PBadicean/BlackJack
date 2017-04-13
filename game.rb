@@ -13,7 +13,7 @@ class Game
 
   def start
     give_out_cards
-    levy
+    ante
     info
   end
 
@@ -24,9 +24,9 @@ class Game
     end
   end
 
-  def levy
-    @user.do_levy
-    @dealer.do_levy
+  def ante
+    @user.do_ante
+    @dealer.do_ante
   end
 
   def info
